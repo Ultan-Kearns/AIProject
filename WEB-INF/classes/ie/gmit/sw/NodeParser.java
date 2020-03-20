@@ -35,6 +35,7 @@ public class NodeParser {
 		closed.add(url);
 		// put new document on queue
 		q.offer(new DocumentNode(doc, score));
+		process();
 		// TODO Auto-generated constructor stub
 	}
 
@@ -84,12 +85,26 @@ public class NodeParser {
 		}
 
 	}
-
+	private int getFrequency(String s) {
+		//check for searchterm in s
+		return 0;
+	}
 	private int getHeuristicScore(Document d) {
 		String title = d.title();
 		System.out.println(closed.size() + " ---> " + title);
-		String head = d.head().toString();
-		String body = d.body().toString();
+		try{
+		String body = d.body().text();
+		System.out.println(body);
+		}
+		catch(Exception e) {
+			
+		}
+		Elements headings = d.select("h1");
+		for(Element heading : headings) {
+			String h1 = heading.text();
+			System.out.println("HEADING --> " + h1);
+		}
+		
 		return 0;
 	}
 
