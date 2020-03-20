@@ -5,12 +5,16 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import net.sourceforge.jFuzzyLogic.FIS;
+import net.sourceforge.jFuzzyLogic.FunctionBlock;
 
 public class NodeParser {
 	// change these only template best first search
@@ -21,6 +25,7 @@ public class NodeParser {
 	private static final int PARAGRAPH_WEIGHT = 1;
 	private String title;
 	private String term;
+	private Map<String, Integer> map = new ConcurrentHashMap<K, V>();
 	// for
 	private Set<String> closed = new ConcurrentSkipListSet<>();
 	// get comparator
@@ -61,7 +66,11 @@ public class NodeParser {
 			}
 		}
 	}
-
+	private void index(String...text) {
+		for(String s : text) {
+			//extact each word from string and add to map after filtering with ignore words(TreeSet)
+		}
+	}
 	private class DocumentNode {
 		private Document document;
 		private int score;
@@ -90,7 +99,16 @@ public class NodeParser {
 		return 0;
 	}
 	private int getHeuristicScore(Document d) {
+		int score = 0;
 		String title = d.title();
+		score = getFrequency(title) * TITLE_WEIGHT;
+		Elements headings = d.select("h1");
+		for(Element heading : headings) {
+			String h1 = heading.text();
+			score += getFrequency(h1) * HEADING_WEIGHT;
+			System.out.println("HEADING --> " + h1);
+		}
+		
 		System.out.println(closed.size() + " ---> " + title);
 		try{
 		String body = d.body().text();
@@ -99,15 +117,23 @@ public class NodeParser {
 		catch(Exception e) {
 			
 		}
-		Elements headings = d.select("h1");
-		for(Element heading : headings) {
-			String h1 = heading.text();
-			System.out.println("HEADING --> " + h1);
-		}
-		
-		return 0;
+		return score;
 	}
-
+	
+	// INCLUDE JFUZZY LOGIC CODE HERE http://jfuzzylogic.sourceforge.net/html/index.html
+	private int getFuzzyHeuristic(int title, int headings, int body) {
+		//load fuzzy inference systems in here
+		FIS fis = FIS.load("./myfcl",true);
+		fis.setVariable("title", title);
+		fis.setVariable("heading", heading);
+		fis.setVariable("body", body);
+		fis.evaluate();
+		//rule example if title is significant and headings is relevant and body is frequent then score is high
+		variable score = FunctionBlock.getVariable("score");
+		//if(fuzzy score is high then call index on the title, headings and body)
+		//then return result
+		return 1;
+	}
 	public static void main(String[] args) throws IOException {
 		new NodeParser("https://jsoup.org/cookbook/input/parse-document-from-string", "Java");
 	}
