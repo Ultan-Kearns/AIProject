@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+  <display-name>Software Development Year 4 - Artificial Intelligence</display-name>
+  <description>
+     2020 Assignment - A Web Opinion Visualiser
+  </description>
+
+
+  <!-- A context is a variable with application wide scope-->
+  <context-param>
+    <param-name>IGNORE_WORDS_FILE_LOCATION</param-name>
+    <param-value>res/ignorewords.txt</param-value>
+  </context-param>
+
+
+
+  <!-- A servlet class must be bound to a name -->
+  <servlet>
+    <servlet-name>service-request-handler</servlet-name>
+    <servlet-class>ie.gmit.sw.ServiceHandler</servlet-class>
+    <load-on-startup>0</load-on-startup>
+  </servlet>
+  
+  <!-- A servlet name must be bound to a URL mapping, i.e. localhost:8080/doProcess executes the servlet ie.gmit.sw.ServiceHandler in WEB-INF/classes -->
+  <servlet-mapping>
+    <servlet-name>service-request-handler</servlet-name>
+    <url-pattern>/doProcess</url-pattern>
+  </servlet-mapping>
+</web-app>

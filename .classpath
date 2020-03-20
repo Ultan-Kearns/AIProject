@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="WEB-INF/classes"/>
+	<classpathentry kind="lib" path="WEB-INF/lib/encog-core-3.4.jar"/>
+	<classpathentry kind="lib" path="WEB-INF/lib/jFuzzyLogic.jar"/>
+	<classpathentry kind="lib" path="WEB-INF/lib/jsoup-1.12.1.jar"/>
+	<classpathentry kind="lib" path="/home/sl0th/Desktop/apache-tomcat-9.0.30/lib/servlet-api.jar"/>
+	<classpathentry kind="output" path="WEB-INF/classes"/>
+</classpath>
