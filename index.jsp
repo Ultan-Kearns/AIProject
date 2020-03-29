@@ -1,6 +1,6 @@
 <%@ include file="includes/header.jsp" %>
 
-<div class="animated bounceInDown" style="font-size:48pt; font-family:arial; color:#990000; font-weight:bold">Web Opinion Visualiser</div>
+<div class="animated bounceInDown" style="font-size:48pt; font-family:arial; color:#990000; font-weight:bold">Web Opinion Visualiser - Ultan Kearns</div>
 
 </p>&nbsp;</p>&nbsp;</p>
 
@@ -19,9 +19,9 @@
 					
 					<p>
 					<select name="cmbOptions">
-						<option>Option 1</option>
-						<option selected>Option 2</option>
-						<option>Option 3</option>
+						<option>10 Words</option>
+						<option selected>20 Words</option>
+						<option>30 Words</option>
 					</select>
 					<p>
 					

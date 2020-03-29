@@ -75,7 +75,7 @@ public class ServiceHandler extends HttpServlet {
 			
 		out.print("<p><fieldset><legend><h3>Result</h3></legend>");
 		
-		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue());
+		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(10));
 		Arrays.sort(words, Comparator.comparing(WordFrequency::getFrequency, Comparator.reverseOrder()));
 		//Arrays.stream(words).forEach(System.out::println);
 
@@ -101,40 +101,11 @@ public class ServiceHandler extends HttpServlet {
  	}
 
 	//A sample array of WordFrequency for demonstration purposes
-	private WordFrequency[] getWordFrequencyKeyValue() {
-		WordFrequency[] wf = new WordFrequency[32];
-		wf[0] = new WordFrequency("Galway", 65476);
-		wf[1] = new WordFrequency("Sligo", 43242);
-		wf[2] = new WordFrequency("Roscommon", 2357);
-		wf[4] = new WordFrequency("Clare", 997);
-		wf[5] = new WordFrequency("Donegal", 876);
-		wf[17] = new WordFrequency("Armagh", 75);
-		wf[6] = new WordFrequency("Waterford", 811);
-		wf[7] = new WordFrequency("Tipperary", 765);
-		wf[8] = new WordFrequency("Westmeath", 643);
-		wf[9] = new WordFrequency("Leitrim", 543);		
-		wf[10] = new WordFrequency("Mayo", 456);
-		wf[11] = new WordFrequency("Offaly", 321);
-		wf[12] = new WordFrequency("Kerry", 221);
-		wf[13] = new WordFrequency("Meath", 101);
-		wf[14] = new WordFrequency("Wicklow", 98);
-		wf[18] = new WordFrequency("Antrim", 67);
-		wf[3] = new WordFrequency("Limerick", 1099);
-		wf[15] = new WordFrequency("Kildare", 89);
-		wf[16] = new WordFrequency("Fermanagh", 81);
-		wf[19] = new WordFrequency("Dublin", 12);
-		wf[20] = new WordFrequency("Carlow", 342);
-		wf[21] = new WordFrequency("Cavan", 234);
-		wf[22] = new WordFrequency("Down", 65);
-		wf[23] = new WordFrequency("Kilkenny", 45);
-		wf[24] = new WordFrequency("Laois", 345);
-		wf[25] = new WordFrequency("Derry", 7);
-		wf[26] = new WordFrequency("Longford", 8);
-		wf[27] = new WordFrequency("Louth", 34);
-		wf[28] = new WordFrequency("Monaghan", 101);
-		wf[29] = new WordFrequency("Tyrone", 121);
-		wf[30] = new WordFrequency("Wexford", 144);
-		wf[31] = new WordFrequency("Cork", 522);
+	private static WordFrequency[] getWordFrequencyKeyValue(int option) {
+		WordFrequency[] wf = new WordFrequency[option];
+		for(int i = 0; i < wf.length; i++) {
+			wf[i] = new WordFrequency("TEST", 1);
+		}
 		return wf;
 	}
 	

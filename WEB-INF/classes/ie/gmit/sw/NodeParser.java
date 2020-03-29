@@ -2,6 +2,7 @@ package ie.gmit.sw;
 
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -15,19 +16,20 @@ import org.jsoup.select.Elements;
 
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
+import net.sourceforge.jFuzzyLogic.rule.Variable;
 
 public class NodeParser {
 	// change these only template best first search
 	// Code was adapted from Assignment workshop by Dr. John Healy GMIT
-	private static final int MAX = 100;
+	private static final int MAX = 10;
 	private static final int TITLE_WEIGHT = 100;
 	private static final int HEADING_WEIGHT = 20;
 	private static final int PARAGRAPH_WEIGHT = 1;
 	private String title;
 	private String term;
-	private Map<String, Integer> map = new ConcurrentHashMap<K, V>();
+	private Map<String, Integer> map = new ConcurrentHashMap<>();
 	// for
-	private Set<String> closed = new ConcurrentSkipListSet<>();
+	private Set<String> closed = new ConcurrentSkipListSet();
 	// get comparator
 	private Queue<DocumentNode> q = new PriorityQueue<>(Comparator.comparing(DocumentNode::getScore));
 
@@ -123,18 +125,21 @@ public class NodeParser {
 	// INCLUDE JFUZZY LOGIC CODE HERE http://jfuzzylogic.sourceforge.net/html/index.html
 	private int getFuzzyHeuristic(int title, int headings, int body) {
 		//load fuzzy inference systems in here
-		FIS fis = FIS.load("./myfcl",true);
+		FIS fis = FIS.load("./conf/Frequency.fcl",true);
 		fis.setVariable("title", title);
-		fis.setVariable("heading", heading);
+		fis.setVariable("heading", headings);
 		fis.setVariable("body", body);
 		fis.evaluate();
+		FunctionBlock fb = fis.getFunctionBlock("frequency");
 		//rule example if title is significant and headings is relevant and body is frequent then score is high
-		variable score = FunctionBlock.getVariable("score");
+		Variable frequency = fb.getVariable("relevance");
 		//if(fuzzy score is high then call index on the title, headings and body)
+		System.out.println("SCORE : " + frequency);
 		//then return result
 		return 1;
 	}
 	public static void main(String[] args) throws IOException {
-		new NodeParser("https://jsoup.org/cookbook/input/parse-document-from-string", "Java");
+		NodeParser p = new NodeParser("https://jsoup.org/cookbook/input/parse-document-from-string", "Java");
+		p.getFuzzyHeuristic(0, 0, 0);
 	}
 }
