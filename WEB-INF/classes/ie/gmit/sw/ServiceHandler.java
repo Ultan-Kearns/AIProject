@@ -5,8 +5,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+
 import javax.imageio.ImageIO;
 
 import java.util.Arrays;
@@ -38,7 +37,23 @@ import ie.gmit.sw.ai.cloud.WordFrequency;
  * you are doing...
  * 
 */
+/*
+ * INFORMATION ABOUT AUTHOUR:
+ * Code by - Ultan Kearns,
+ * Code adapted from Dr. John Healy's example,
+ * Student Number: G00343745,
+ * Fourth Year AI Module Project
+ */
 
+/*
+ * ABOUT CLASS:
+ * 
+ * This class will handle creating the array of words and also 
+ * creating the image that will be presented to the user, in 
+ * addition this class also takes in the option that the user 
+ * picks at the start of querying.
+ * 
+ */
 public class ServiceHandler extends HttpServlet {
 	private String ignoreWords = null;
 	private File f;
@@ -57,9 +72,10 @@ public class ServiceHandler extends HttpServlet {
 		
 		//Initialise some request varuables with the submitted form info. These are local to this method and thread safe...
 		String option = req.getParameter("cmbOptions"); //Change options to whatever you think adds value to your assignment...
-		String s = req.getParameter("query");
-
-		out.print("<html><head><title>Artificial Intelligence Assignment</title>");		
+		String query = req.getParameter("query");
+		//search duckduckgo for query
+		NodeParser np = new NodeParser("https://duckduckgo.com/?"+query, query);
+		out.print("<html><head><title>Artificial Intelligence Assignment - Ultan Kearns </title>");		
 		out.print("<link rel=\"stylesheet\" href=\"includes/style.css\">");
 		
 		out.print("</head>");		
@@ -75,7 +91,7 @@ public class ServiceHandler extends HttpServlet {
 			
 		out.print("<p><fieldset><legend><h3>Result</h3></legend>");
 		
-		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(10));
+		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(option,query));
 		Arrays.sort(words, Comparator.comparing(WordFrequency::getFrequency, Comparator.reverseOrder()));
 		//Arrays.stream(words).forEach(System.out::println);
 
@@ -100,11 +116,13 @@ public class ServiceHandler extends HttpServlet {
 		doGet(req, resp);
  	}
 
-	//A sample array of WordFrequency for demonstration purposes
-	private static WordFrequency[] getWordFrequencyKeyValue(int option) {
-		WordFrequency[] wf = new WordFrequency[option];
+	//Place most frequent words on this list, this also sets the size of the array of words 
+	//using the options field from the form
+	private static WordFrequency[] getWordFrequencyKeyValue(String option,String query) throws IOException {
+		int value = Integer.parseInt(option);
+		WordFrequency[]  wf = new WordFrequency[value];
 		for(int i = 0; i < wf.length; i++) {
-			wf[i] = new WordFrequency("TEST", 1);
+			wf[i] = new WordFrequency(query, 1);
 		}
 		return wf;
 	}

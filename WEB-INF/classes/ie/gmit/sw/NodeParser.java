@@ -14,6 +14,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import ie.gmit.sw.ai.cloud.WordFrequency;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import net.sourceforge.jFuzzyLogic.rule.Variable;
@@ -27,12 +28,11 @@ public class NodeParser {
 	private static final int PARAGRAPH_WEIGHT = 1;
 	private String title;
 	private String term;
-	private Map<String, Integer> map = new ConcurrentHashMap<>();
 	// for
 	private Set<String> closed = new ConcurrentSkipListSet();
 	// get comparator
 	private Queue<DocumentNode> q = new PriorityQueue<>(Comparator.comparing(DocumentNode::getScore));
-
+	static Map<String, Integer> map = new ConcurrentHashMap<>();
 	public NodeParser(String url, String searchTerm) throws IOException {
 		super();
 		this.term = searchTerm;
@@ -68,10 +68,11 @@ public class NodeParser {
 			}
 		}
 	}
-	private void index(String...text) {
+	private static Map index(String...text) {
 		for(String s : text) {
 			//extact each word from string and add to map after filtering with ignore words(TreeSet)
-		}
+ 		}
+		return map;
 	}
 	private class DocumentNode {
 		private Document document;
@@ -98,16 +99,19 @@ public class NodeParser {
 	}
 	private int getFrequency(String s) {
 		//check for searchterm in s
+		for(int i = 0; i < s.length(); i++) {
+			
+		}
 		return 0;
 	}
-	private int getHeuristicScore(Document d) {
-		int score = 0;
+	private int getHeuristicScore(Document d) throws IOException {
+		int titleScore = 0,headingScore = 0,bodyScore = 0;
 		String title = d.title();
-		score = getFrequency(title) * TITLE_WEIGHT;
+		titleScore = getFrequency(title) * TITLE_WEIGHT;
 		Elements headings = d.select("h1");
 		for(Element heading : headings) {
 			String h1 = heading.text();
-			score += getFrequency(h1) * HEADING_WEIGHT;
+			headingScore += getFrequency(h1) * HEADING_WEIGHT;
 			System.out.println("HEADING --> " + h1);
 		}
 		
@@ -115,31 +119,38 @@ public class NodeParser {
 		try{
 		String body = d.body().text();
 		System.out.println(body);
+		//need to iterate over body and search for query string
 		}
 		catch(Exception e) {
 			
 		}
-		return score;
+		if(titleScore + headingScore + bodyScore > 50) {
+			getFuzzyHeuristic(titleScore, headingScore, bodyScore);
+		}
+		return titleScore + headingScore + bodyScore;
 	}
 	
 	// INCLUDE JFUZZY LOGIC CODE HERE http://jfuzzylogic.sourceforge.net/html/index.html
-	private int getFuzzyHeuristic(int title, int headings, int body) {
+	private int getFuzzyHeuristic(int title, int heading, int body) {
 		//load fuzzy inference systems in here
 		FIS fis = FIS.load("./conf/Frequency.fcl",true);
 		fis.setVariable("title", title);
-		fis.setVariable("heading", headings);
+		fis.setVariable("heading", heading);
 		fis.setVariable("body", body);
 		fis.evaluate();
+ 
 		FunctionBlock fb = fis.getFunctionBlock("frequency");
 		//rule example if title is significant and headings is relevant and body is frequent then score is high
 		Variable frequency = fb.getVariable("relevance");
 		//if(fuzzy score is high then call index on the title, headings and body)
 		System.out.println("SCORE : " + frequency);
+		//need to index index(title,heading,body);
 		//then return result
 		return 1;
 	}
 	public static void main(String[] args) throws IOException {
-		NodeParser p = new NodeParser("https://jsoup.org/cookbook/input/parse-document-from-string", "Java");
-		p.getFuzzyHeuristic(0, 0, 0);
+		NodeParser p = new NodeParser("https://duckduckgo.com/?java", "Java");
+
+		p.getFuzzyHeuristic(10,10,10);
 	}
 }

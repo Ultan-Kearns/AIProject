@@ -19,9 +19,9 @@
 					
 					<p>
 					<select name="cmbOptions">
-						<option>10 Words</option>
-						<option selected>20 Words</option>
-						<option>30 Words</option>
+						<option>10</option>
+						<option selected>20</option>
+						<option>30</option>
 					</select>
 					<p>
 					

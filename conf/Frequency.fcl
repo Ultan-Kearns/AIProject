@@ -24,9 +24,9 @@ FUNCTION_BLOCK frequency
 		TERM frequent := (0.7,1); 
 	END_FUZZIFY
 	DEFUZZIFY relevance
-		TERM low := (0,0) (5,1) (10,0);
-		TERM normal := (10,0) (15,1) (20,0);
-		TERM high := (10,0) (15,1) (20,0);
+		TERM low := (0,1) (10,0);
+		TERM normal := (10,1) (15,1) (20,0);
+		TERM high := (20,1)(100,1);
 		METHOD : COG;
 		DEFAULT := 0; 
 	END_DEFUZZIFY
