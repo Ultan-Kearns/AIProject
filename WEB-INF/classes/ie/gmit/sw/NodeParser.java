@@ -70,7 +70,10 @@ public class NodeParser {
 	}
 	private static Map index(String...text) {
 		for(String s : text) {
+			int i = 0;
 			//extact each word from string and add to map after filtering with ignore words(TreeSet)
+			map.put(s, i);
+			i++;
  		}
 		return map;
 	}
@@ -100,7 +103,6 @@ public class NodeParser {
 	private int getFrequency(String s) {
 		//check for searchterm in s
 		for(int i = 0; i < s.length(); i++) {
-			
 		}
 		return 0;
 	}
@@ -138,7 +140,7 @@ public class NodeParser {
 		fis.setVariable("heading", heading);
 		fis.setVariable("body", body);
 		fis.evaluate();
- 
+		System.out.println("HEding = " + heading + " TITLE = " + title + "body = " + body );
 		FunctionBlock fb = fis.getFunctionBlock("frequency");
 		//rule example if title is significant and headings is relevant and body is frequent then score is high
 		Variable frequency = fb.getVariable("relevance");
@@ -150,7 +152,6 @@ public class NodeParser {
 	}
 	public static void main(String[] args) throws IOException {
 		NodeParser p = new NodeParser("https://duckduckgo.com/?java", "Java");
-
-		p.getFuzzyHeuristic(10,10,10);
+		p.getFuzzyHeuristic(1,2,1);
 	}
 }

@@ -91,7 +91,7 @@ public class ServiceHandler extends HttpServlet {
 			
 		out.print("<p><fieldset><legend><h3>Result</h3></legend>");
 		
-		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(option,query));
+		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(option,np.map.toString()));
 		Arrays.sort(words, Comparator.comparing(WordFrequency::getFrequency, Comparator.reverseOrder()));
 		//Arrays.stream(words).forEach(System.out::println);
 
@@ -120,9 +120,10 @@ public class ServiceHandler extends HttpServlet {
 	//using the options field from the form
 	private static WordFrequency[] getWordFrequencyKeyValue(String option,String query) throws IOException {
 		int value = Integer.parseInt(option);
+		
 		WordFrequency[]  wf = new WordFrequency[value];
 		for(int i = 0; i < wf.length; i++) {
-			wf[i] = new WordFrequency(query, 1);
+			wf[i] = new WordFrequency(query, 500);
 		}
 		return wf;
 	}
