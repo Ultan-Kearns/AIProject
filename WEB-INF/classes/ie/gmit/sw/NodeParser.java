@@ -18,11 +18,15 @@ import ie.gmit.sw.ai.cloud.WordFrequency;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import net.sourceforge.jFuzzyLogic.rule.Variable;
-
+/*
+ * This class will traverse the graph of nodes and get the most relevant terms that 
+ * are found in each webpage.  These terms will be added to the wordcloud if they are 
+ * frequent which will be determined by the Heuristics
+ */
 public class NodeParser {
 	// change these only template best first search
 	// Code was adapted from Assignment workshop by Dr. John Healy GMIT
-	private static final int MAX = 10;
+	private static final int MAX = 20;
 	private static final int TITLE_WEIGHT = 100;
 	private static final int HEADING_WEIGHT = 20;
 	private static final int PARAGRAPH_WEIGHT = 1;
@@ -36,13 +40,16 @@ public class NodeParser {
 	public NodeParser(String url, String searchTerm) throws IOException {
 		super();
 		this.term = searchTerm;
-		Document doc = Jsoup.connect(url).get();
+		//https://duckduckgo.com/html/?q= works
+		System.out.println("URL : " + url + "  CHILD  " + searchTerm);
+		Document doc = Jsoup.connect(url + searchTerm).get();
 		int score = getHeuristicScore(doc);
 		// for tracking
 		closed.add(url);
 		// put new document on queue
 		q.offer(new DocumentNode(doc, score));
 		process();
+ 
 		// TODO Auto-generated constructor stub
 	}
 
@@ -61,12 +68,14 @@ public class NodeParser {
 						closed.add(link);
 						child = Jsoup.connect(link).get();
 						int score = getHeuristicScore(child);
+						System.out.println("CHILD TITLE: " + child.title());
 						q.offer(new DocumentNode(child, score));
 					} catch (IOException e1) {
 					}
 				}
 			}
 		}
+
 	}
 	private static Map index(String...text) {
 		for(String s : text) {
@@ -109,6 +118,7 @@ public class NodeParser {
 	private int getHeuristicScore(Document d) throws IOException {
 		int titleScore = 0,headingScore = 0,bodyScore = 0;
 		String title = d.title();
+		System.out.println("TITLE" + d.title());
 		titleScore = getFrequency(title) * TITLE_WEIGHT;
 		Elements headings = d.select("h1");
 		for(Element heading : headings) {
@@ -126,8 +136,11 @@ public class NodeParser {
 		catch(Exception e) {
 			
 		}
-		if(titleScore + headingScore + bodyScore > 50) {
+		if(titleScore + headingScore + bodyScore > 5) {
 			getFuzzyHeuristic(titleScore, headingScore, bodyScore);
+		}
+		else {
+			System.out.println("irrelevant");
 		}
 		return titleScore + headingScore + bodyScore;
 	}
@@ -135,7 +148,7 @@ public class NodeParser {
 	// INCLUDE JFUZZY LOGIC CODE HERE http://jfuzzylogic.sourceforge.net/html/index.html
 	private int getFuzzyHeuristic(int title, int heading, int body) {
 		//load fuzzy inference systems in here
-		FIS fis = FIS.load("./conf/Frequency.fcl",true);
+		FIS fis = FIS.load("./res/Frequency.fcl",true);
 		fis.setVariable("title", title);
 		fis.setVariable("heading", heading);
 		fis.setVariable("body", body);
@@ -151,7 +164,7 @@ public class NodeParser {
 		return 1;
 	}
 	public static void main(String[] args) throws IOException {
-		NodeParser p = new NodeParser("https://duckduckgo.com/?java", "Java");
-		p.getFuzzyHeuristic(1,2,1);
+		NodeParser p = new NodeParser("https://duckduckgo.com/html/?q=", "java");
+		p.process();
 	}
 }

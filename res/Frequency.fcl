@@ -41,6 +41,7 @@ FUNCTION_BLOCK frequency
 		RULE 5 :IF title IS infrequent AND heading IS infrequent AND body IS infrequent THEN relevance IS low; 		
 		RULE 6 :IF title IS nominal AND heading IS nominal AND body IS nominal THEN relevance IS normal; 		
 		RULE 7: IF title IS frequent OR body IS frequent OR heading IS frequent THEN relevance IS high;
+ 		RULE 8: IF title IS frequent AND body IS frequent AND heading IS frequent THEN relevance IS high;
  		
 		
 	END_RULEBLOCK
