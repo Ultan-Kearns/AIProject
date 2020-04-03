@@ -8,16 +8,18 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import ie.gmit.sw.ai.cloud.WordFrequency;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import net.sourceforge.jFuzzyLogic.rule.Variable;
+
 /*
  * This class will traverse the graph of nodes and get the most relevant terms that 
  * are found in each webpage.  These terms will be added to the wordcloud if they are 
@@ -37,10 +39,11 @@ public class NodeParser {
 	// get comparator
 	private Queue<DocumentNode> q = new PriorityQueue<>(Comparator.comparing(DocumentNode::getScore));
 	static Map<String, Integer> map = new ConcurrentHashMap<>();
+
 	public NodeParser(String url, String searchTerm) throws IOException {
 		super();
 		this.term = searchTerm;
-		//https://duckduckgo.com/html/?q= works
+		// https://duckduckgo.com/html/?q= works
 		System.out.println("URL : " + url + "  CHILD  " + searchTerm);
 		Document doc = Jsoup.connect(url + searchTerm).get();
 		int score = getHeuristicScore(doc);
@@ -49,7 +52,7 @@ public class NodeParser {
 		// put new document on queue
 		q.offer(new DocumentNode(doc, score));
 		process();
- 
+
 		// TODO Auto-generated constructor stub
 	}
 
@@ -77,15 +80,18 @@ public class NodeParser {
 		}
 
 	}
-	private static Map index(String...text) {
-		for(String s : text) {
+
+	private static Map index(String... text) {
+		for (String s : text) {
 			int i = 0;
-			//extact each word from string and add to map after filtering with ignore words(TreeSet)
+			// extact each word from string and add to map after filtering with ignore
+			// words(TreeSet)
 			map.put(s, i);
 			i++;
- 		}
+		}
 		return map;
 	}
+
 	private class DocumentNode {
 		private Document document;
 		private int score;
@@ -109,12 +115,19 @@ public class NodeParser {
 		}
 
 	}
+
 	private int getFrequency(String s) {
-		//check for searchterm in s
-		for(int i = 0; i < s.length(); i++) {
+		s = s.toLowerCase();
+		int i = 0;
+		// Use regex to detect term in string s - ref : https://stackoverflow.com/questions/22566503/count-the-number-of-occurrences-of-a-word-in-a-string
+		Pattern searchPattern = Pattern.compile(term);
+		Matcher findMatch = searchPattern.matcher(s);
+		while (findMatch.find()) {
+		    i++;
 		}
-		return 0;
+		return i;
 	}
+
 	private int getHeuristicScore(Document d) throws IOException {
 		int titleScore = 0,headingScore = 0,bodyScore = 0;
 		String title = d.title();
@@ -128,10 +141,18 @@ public class NodeParser {
 		}
 		
 		System.out.println(closed.size() + " ---> " + title);
-		try{
-		String body = d.body().text();
-		System.out.println(body);
-		//need to iterate over body and search for query string
+	 
+ 
+		Elements paragraphs = d.select("p");
+		try {
+			String bodyText = null;
+		for(Element paragraph : paragraphs) {
+			System.out.println("BODY " + paragraph.text());
+			bodyText += paragraph.text();
+					//need to iterate over body and search for query string
+		}
+		bodyScore = getFrequency(bodyText) * PARAGRAPH_WEIGHT;
+
 		}
 		catch(Exception e) {
 			
@@ -143,28 +164,32 @@ public class NodeParser {
 			System.out.println("irrelevant");
 		}
 		return titleScore + headingScore + bodyScore;
+		
 	}
-	
-	// INCLUDE JFUZZY LOGIC CODE HERE http://jfuzzylogic.sourceforge.net/html/index.html
+
+	// INCLUDE JFUZZY LOGIC CODE HERE
+	// http://jfuzzylogic.sourceforge.net/html/index.html
 	private int getFuzzyHeuristic(int title, int heading, int body) {
-		//load fuzzy inference systems in here
-		FIS fis = FIS.load("./res/Frequency.fcl",true);
+		// load fuzzy inference systems in here
+		FIS fis = FIS.load("./res/Frequency.fcl", true);
 		fis.setVariable("title", title);
 		fis.setVariable("heading", heading);
 		fis.setVariable("body", body);
 		fis.evaluate();
-		System.out.println("HEding = " + heading + " TITLE = " + title + "body = " + body );
+		System.out.println("HEding = " + heading + " TITLE = " + title + "body = " + body);
 		FunctionBlock fb = fis.getFunctionBlock("frequency");
-		//rule example if title is significant and headings is relevant and body is frequent then score is high
+		// rule example if title is significant and headings is relevant and body is
+		// frequent then score is high
 		Variable frequency = fb.getVariable("relevance");
-		//if(fuzzy score is high then call index on the title, headings and body)
+		// if(fuzzy score is high then call index on the title, headings and body)
 		System.out.println("SCORE : " + frequency);
-		//need to index index(title,heading,body);
-		//then return result
+		// need to index index(title,heading,body);
+		// then return result
 		return 1;
 	}
+
 	public static void main(String[] args) throws IOException {
-		NodeParser p = new NodeParser("https://duckduckgo.com/html/?q=", "java");
+		NodeParser p = new NodeParser("https://duckduckgo.com/html/?q=", "test");
 		p.process();
 	}
 }

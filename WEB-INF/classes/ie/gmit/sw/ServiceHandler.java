@@ -74,7 +74,8 @@ public class ServiceHandler extends HttpServlet {
 		String option = req.getParameter("cmbOptions"); //Change options to whatever you think adds value to your assignment...
 		String query = req.getParameter("query");
 		//search duckduckgo for query
-		NodeParser np = new NodeParser("https://duckduckgo.com/?"+query, query);
+		String url = "https://duckduckgo.com/html/?q=";
+		NodeParser p = new NodeParser(url, query);
 		out.print("<html><head><title>Artificial Intelligence Assignment - Ultan Kearns </title>");		
 		out.print("<link rel=\"stylesheet\" href=\"includes/style.css\">");
 		
@@ -91,7 +92,7 @@ public class ServiceHandler extends HttpServlet {
 			
 		out.print("<p><fieldset><legend><h3>Result</h3></legend>");
 		
-		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(option,np.map.toString()));
+		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(option,query));
 		Arrays.sort(words, Comparator.comparing(WordFrequency::getFrequency, Comparator.reverseOrder()));
 		//Arrays.stream(words).forEach(System.out::println);
 
@@ -120,7 +121,6 @@ public class ServiceHandler extends HttpServlet {
 	//using the options field from the form
 	private static WordFrequency[] getWordFrequencyKeyValue(String option,String query) throws IOException {
 		int value = Integer.parseInt(option);
-		
 		WordFrequency[]  wf = new WordFrequency[value];
 		for(int i = 0; i < wf.length; i++) {
 			wf[i] = new WordFrequency(query, 500);
