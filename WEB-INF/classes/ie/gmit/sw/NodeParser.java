@@ -145,13 +145,12 @@ public class NodeParser {
  
 		Elements paragraphs = d.select("p");
 		try {
-			String bodyText = null;
+			StringBuffer bodyText = new StringBuffer();
 		for(Element paragraph : paragraphs) {
-			System.out.println("BODY " + paragraph.text());
-			bodyText += paragraph.text();
+			bodyText.append(paragraph.text());
 					//need to iterate over body and search for query string
 		}
-		bodyScore = getFrequency(bodyText) * PARAGRAPH_WEIGHT;
+		bodyScore = getFrequency(bodyText.toString()) * PARAGRAPH_WEIGHT;
 
 		}
 		catch(Exception e) {
