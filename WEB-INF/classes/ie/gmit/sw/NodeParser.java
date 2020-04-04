@@ -39,7 +39,12 @@ public class NodeParser {
 	// get comparator
 	private Queue<DocumentNode> q = new PriorityQueue<>(Comparator.comparing(DocumentNode::getScore));
 	static Map<String, Integer> map = new ConcurrentHashMap<>();
-
+	/**
+	 * 
+	 * @param url
+	 * @param searchTerm
+	 * @throws IOException
+	 */
 	public NodeParser(String url, String searchTerm) throws IOException {
 		super();
 		this.term = searchTerm;
@@ -55,7 +60,9 @@ public class NodeParser {
 
 		// TODO Auto-generated constructor stub
 	}
-
+	/**
+	 * processes the list
+	 */
 	public void process() {
 		while (!q.isEmpty() && closed.size() <= MAX) {
 			DocumentNode node = q.poll();
@@ -80,7 +87,12 @@ public class NodeParser {
 		}
 
 	}
-
+	/**
+	 * 
+	 * @param text
+	 * @return
+	 * this function will return a map of the text
+	 */
 	private static Map index(String... text) {
 		for (String s : text) {
 			int i = 0;
@@ -115,7 +127,12 @@ public class NodeParser {
 		}
 
 	}
-
+	/**
+	 * 
+	 * @param s
+	 * @return
+	 * Uses regular expressions to detect for patterns in text
+	 */
 	private int getFrequency(String s) {
 		s = s.toLowerCase();
 		int i = 0;
@@ -127,7 +144,14 @@ public class NodeParser {
 		}
 		return i;
 	}
-
+	/**
+	 * 
+	 * @param d
+	 * @return
+	 * @throws IOException
+	 * Scores the heuristic to see the occurence of the term in title, body and text, if it passes a certain threshold it will be 
+	 * scored by fuzzy heuristic function
+	 */
 	private int getHeuristicScore(Document d) throws IOException {
 		int titleScore = 0,headingScore = 0,bodyScore = 0;
 		String title = d.title();
@@ -148,7 +172,7 @@ public class NodeParser {
 			StringBuffer bodyText = new StringBuffer();
 		for(Element paragraph : paragraphs) {
 			bodyText.append(paragraph.text());
-					//need to iterate over body and search for query string
+					//need to iterate over body and search for the most common strings in body
 		}
 		bodyScore = getFrequency(bodyText.toString()) * PARAGRAPH_WEIGHT;
 
@@ -168,6 +192,15 @@ public class NodeParser {
 
 	// INCLUDE JFUZZY LOGIC CODE HERE
 	// http://jfuzzylogic.sourceforge.net/html/index.html
+	/**
+	 * 
+	 * @param title
+	 * @param heading
+	 * @param body
+	 * @return
+	 * This function gets the fuzzy heuristic score of the search, it loads the FCL file and scores the input 
+	 * according to rules defined in the FCL file.
+	 */
 	private int getFuzzyHeuristic(int title, int heading, int body) {
 		// load fuzzy inference systems in here
 		FIS fis = FIS.load("./res/Frequency.fcl", true);
