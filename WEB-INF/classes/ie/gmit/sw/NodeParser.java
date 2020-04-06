@@ -25,10 +25,16 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
  * are found in each webpage.  These terms will be added to the wordcloud if they are 
  * frequent which will be determined by the Heuristics
  */
+/*
+ * NEED TO DO: 
+ * 1. Get most occurring words in html body, title, text
+ * 2. Get distance between strings in words
+ * 3. Use BFS, DFS, or Breadth First Search when navigating tree or graph
+ */
 public class NodeParser {
 	// change these only template best first search
 	// Code was adapted from Assignment workshop by Dr. John Healy GMIT
-	private static final int MAX = 20;
+	private static final int MAX = 50;
 	private static final int TITLE_WEIGHT = 100;
 	private static final int HEADING_WEIGHT = 20;
 	private static final int PARAGRAPH_WEIGHT = 1;
@@ -79,7 +85,9 @@ public class NodeParser {
 						child = Jsoup.connect(link).get();
 						int score = getHeuristicScore(child);
 						System.out.println("CHILD TITLE: " + child.title());
-						q.offer(new DocumentNode(child, score));
+						if(score > 10) {
+							q.offer(new DocumentNode(child, score));
+						}
 					} catch (IOException e1) {
 					}
 				}
@@ -172,8 +180,15 @@ public class NodeParser {
 			StringBuffer bodyText = new StringBuffer();
 		for(Element paragraph : paragraphs) {
 			bodyText.append(paragraph.text());
-					//need to iterate over body and search for the most common strings in body
-		}
+ 		}
+		//Break body into words
+	      Pattern pattern = Pattern.compile("\\w+");
+	      //Creating a Matcher object
+	      Matcher matcher = pattern.matcher(bodyText);
+	      System.out.println("IN");
+	      while(matcher.find()) {
+	          System.out.print("WORDS : " + matcher.group()+" ");
+	       }
 		bodyScore = getFrequency(bodyText.toString()) * PARAGRAPH_WEIGHT;
 
 		}
