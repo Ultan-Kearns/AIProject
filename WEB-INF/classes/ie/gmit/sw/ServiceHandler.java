@@ -1,16 +1,21 @@
 package ie.gmit.sw;
 
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
 import java.awt.image.BufferedImage;
-
-import javax.imageio.ImageIO;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
+
+import javax.imageio.ImageIO;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import ie.gmit.sw.ai.cloud.LogarithmicSpiralPlacer;
 import ie.gmit.sw.ai.cloud.WeightedFont;
@@ -54,7 +59,9 @@ import ie.gmit.sw.ai.cloud.WordFrequency;
  * picks at the start of querying.
  * 
  */
-public class ServiceHandler extends HttpServlet {
+public class ServiceHandler extends HttpServlet{
+ 
+	private static final long serialVersionUID = 1L;
 	private String ignoreWords = null;
 	private File f;
 	
@@ -73,7 +80,7 @@ public class ServiceHandler extends HttpServlet {
 		//Initialise some request varuables with the submitted form info. These are local to this method and thread safe...
 		String option = req.getParameter("cmbOptions"); //Change options to whatever you think adds value to your assignment...
 		String query = req.getParameter("query");
-		//search duckduckgo for query
+
 		String url = "https://duckduckgo.com/html/?q=";
 		NodeParser p = new NodeParser(url, query);
 		out.print("<html><head><title>Artificial Intelligence Assignment - Ultan Kearns </title>");		
@@ -112,8 +119,9 @@ public class ServiceHandler extends HttpServlet {
 		out.print("</body>");	
 		out.print("</html>");	
 	}
-
+ 
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	
 		doGet(req, resp);
  	}
 

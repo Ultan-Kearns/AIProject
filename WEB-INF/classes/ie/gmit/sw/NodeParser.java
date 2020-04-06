@@ -31,7 +31,7 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
  * 2. Get distance between strings in words
  * 3. Use BFS, DFS, or Breadth First Search when navigating tree or graph
  */
-public class NodeParser {
+public class NodeParser implements Runnable {
 	// change these only template best first search
 	// Code was adapted from Assignment workshop by Dr. John Healy GMIT
 	private static final int MAX = 50;
@@ -52,7 +52,10 @@ public class NodeParser {
 	 * @throws IOException
 	 */
 	public NodeParser(String url, String searchTerm) throws IOException {
+	
 		super();
+		Thread t = new Thread();
+		t.run();
 		this.term = searchTerm;
 		// https://duckduckgo.com/html/?q= works
 		System.out.println("URL : " + url + "  CHILD  " + searchTerm);
@@ -62,7 +65,7 @@ public class NodeParser {
 		closed.add(url);
 		// put new document on queue
 		q.offer(new DocumentNode(doc, score));
-		process();
+ 
 
 		// TODO Auto-generated constructor stub
 	}
@@ -141,17 +144,20 @@ public class NodeParser {
 	 * @return
 	 * Uses regular expressions to detect for patterns in text
 	 */
-	private int getFrequency(String s) {
-		s = s.toLowerCase();
+	private int getFrequency(String word,String textBody) {
+		// get both strings to lower
+		word = word.toLowerCase();
+		textBody = textBody.toLowerCase();
 		int i = 0;
-		// Use regex to detect term in string s - ref : https://stackoverflow.com/questions/22566503/count-the-number-of-occurrences-of-a-word-in-a-string
-		Pattern searchPattern = Pattern.compile(term);
-		Matcher findMatch = searchPattern.matcher(s);
+		// Use regex to detect s - ref : https://stackoverflow.com/questions/22566503/count-the-number-of-occurrences-of-a-word-in-a-string
+		Pattern searchPattern = Pattern.compile(word);
+		Matcher findMatch = searchPattern.matcher(textBody);
 		while (findMatch.find()) {
 		    i++;
 		}
 		return i;
 	}
+	
 	/**
 	 * 
 	 * @param d
@@ -164,14 +170,29 @@ public class NodeParser {
 		int titleScore = 0,headingScore = 0,bodyScore = 0;
 		String title = d.title();
 		System.out.println("TITLE" + d.title());
-		titleScore = getFrequency(title) * TITLE_WEIGHT;
+		titleScore = getFrequency(title,term) * TITLE_WEIGHT;
+		
 		Elements headings = d.select("h1");
+		StringBuffer headingText = new StringBuffer();
 		for(Element heading : headings) {
 			String h1 = heading.text();
-			headingScore += getFrequency(h1) * HEADING_WEIGHT;
+			headingText.append(h1);
 			System.out.println("HEADING --> " + h1);
 		}
-		
+		//call this after building collection of headingtext
+		//headingScore += getFrequency(h1) * HEADING_WEIGHT;
+		//Break heading into words
+	      Pattern pattern = Pattern.compile("\\w+");
+	      //Creating a Matcher object
+	      Matcher matcher = pattern.matcher(headingText);
+	      System.out.println("IN");
+	      //need to filter out ignore words here
+	      //match each word with body text return highest word count
+	      while(matcher.find()) {
+	    	  System.out.println(matcher.group());
+	  		  bodyScore = getFrequency(matcher.group(),headingText.toString()) * PARAGRAPH_WEIGHT;
+	       }
+
 		System.out.println(closed.size() + " ---> " + title);
 	 
  
@@ -182,14 +203,16 @@ public class NodeParser {
 			bodyText.append(paragraph.text());
  		}
 		//Break body into words
-	      Pattern pattern = Pattern.compile("\\w+");
+	        pattern = Pattern.compile("\\w+");
 	      //Creating a Matcher object
-	      Matcher matcher = pattern.matcher(bodyText);
+	        matcher = pattern.matcher(bodyText);
 	      System.out.println("IN");
+	      //need to filter out ignore words here
+	      //match each word with body text return highest word count
 	      while(matcher.find()) {
-	          System.out.print("WORDS : " + matcher.group()+" ");
+	    	  System.out.println(matcher.group());
+	  		  bodyScore = getFrequency(matcher.group(),bodyText.toString()) * PARAGRAPH_WEIGHT;
 	       }
-		bodyScore = getFrequency(bodyText.toString()) * PARAGRAPH_WEIGHT;
 
 		}
 		catch(Exception e) {
@@ -238,5 +261,10 @@ public class NodeParser {
 	public static void main(String[] args) throws IOException {
 		NodeParser p = new NodeParser("https://duckduckgo.com/html/?q=", "test");
 		p.process();
+	}
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
 	}
 }
