@@ -1,28 +1,50 @@
+/* This is the function block aptly named frequency
+* here I will apply heuristics to determine how relevant
+* a word is compared to other words in the text, the higher 
+* the number of occurrences of the word the higher the frequency output.
+* There are three types of frequency I considered to be relevant to the problem
+* These are as follows: infrequent - the word is not occurring enough to be considered 
+* relevant, nominal - the word appears an average number of times could be relevant 
+* depending if it's in title, heading or body, and frequent - the word is very relevant
+* and appears often compared to other words
+* This function will analyze all the text found from the service handler and compute 
+* a result
+*/
 FUNCTION_BLOCK frequency
-	
+	// Here we define the inputs which we consider necessary to compute the output
+	// Title, heading and body will all be analyzed
 	VAR_INPUT
 		title : REAL; 
 		heading : REAL; 
 		body: REAL;
 	END_VAR
+	//define output named relevance, how relevant will the word be?
 	VAR_OUTPUT
 		relevance : REAL; 
 	END_VAR
+	// title is worth more than heading and body
+	// words here can be sparse but still considered relevant
 	FUZZIFY title
 		TERM infrequent := (0,1)(2,0);
 		TERM nominal :=  (1,0)(2,1)(6,0);
 		TERM frequent :=  (4,0)(10,1); 
 	END_FUZZIFY 
+	// heading is worth less than title but more than body
+	// words here most appear more frequently than title to be considered relevant
+	// but words can appear less times than in body and be considered relevant
 	FUZZIFY heading 
 		TERM infrequent := (0,1)(2,0);
 		TERM nominal :=  (1,0)(3,1)(4,0);
 		TERM frequent := (3,0)(6,1); 
 	END_FUZZIFY
+	//body is worth less than both heading and title 
+	//and words most appear more frequently here to be considered relevant
 	FUZZIFY body 
 		TERM infrequent := (0,1)(5,0);
 		TERM nominal := (3,0)(6,1)(12,0);
 		TERM frequent :=  (10,0)(20,1); 
 	END_FUZZIFY
+	//relevance is determined by the rules
 	DEFUZZIFY relevance
 		TERM low := (0,1) (5,0);
 		TERM normal :=(5,0)(10,1)(15,0);
@@ -34,6 +56,10 @@ FUNCTION_BLOCK frequency
 		AND : MIN;
 		ACT : MIN;
 		ACCU : MAX;
+		/*
+		* These rules define what I consider to be relevant,
+		* I have tried to cover all scenarios with these rules.
+		*/
 		RULE 1 :IF title IS frequent THEN relevance IS high;
 		RULE 2 :IF title IS nominal OR heading IS frequent Or body IS frequent THEN relevance IS high;
 		RULE 3 :IF title IS infrequent AND heading IS nominal OR body IS nominal THEN relevance IS normal;
