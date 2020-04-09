@@ -27,24 +27,24 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
  */
 /*
  * NEED TO DO: 
- * 1. Get most occurring words in html body, title, text
+ * 1. Get most occurring words in html body, title, text(Almost done have words broken up  just need to score them based on occurrence.
  * 2. Get distance between strings in words
  * 3. Use BFS, DFS, or Breadth First Search when navigating tree or graph
  */
-public class NodeParser implements Runnable {
+public class NodeParser {
 	// change these only template best first search
 	// Code was adapted from Assignment workshop by Dr. John Healy GMIT
-	private static final int MAX = 50;
+	private static final int MAX = 100;
 	private static final int TITLE_WEIGHT = 100;
 	private static final int HEADING_WEIGHT = 20;
 	private static final int PARAGRAPH_WEIGHT = 1;
 	private String title;
 	private String term;
 	// for
-	private Set<String> closed = new ConcurrentSkipListSet();
+	private Set<String> closed = new ConcurrentSkipListSet<String>();
 	// get comparator
 	private Queue<DocumentNode> q = new PriorityQueue<>(Comparator.comparing(DocumentNode::getScore));
-	static Map<String, Integer> map = new ConcurrentHashMap<>();
+	Map<String, Integer> map = new ConcurrentHashMap<>();
 	/**
 	 * 
 	 * @param url
@@ -52,10 +52,7 @@ public class NodeParser implements Runnable {
 	 * @throws IOException
 	 */
 	public NodeParser(String url, String searchTerm) throws IOException {
-	
 		super();
-		Thread t = new Thread();
-		t.run();
 		this.term = searchTerm;
 		// https://duckduckgo.com/html/?q= works
 		System.out.println("URL : " + url + "  CHILD  " + searchTerm);
@@ -104,14 +101,9 @@ public class NodeParser implements Runnable {
 	 * @return
 	 * this function will return a map of the text
 	 */
-	private static Map index(String... text) {
-		for (String s : text) {
-			int i = 0;
-			// extact each word from string and add to map after filtering with ignore
-			// words(TreeSet)
-			map.put(s, i);
-			i++;
-		}
+	private Map<String, Integer> index(String text,int frequency) {
+		//put word and number of occurrences into map	 
+		map.put(text,frequency); 
 		return map;
 	}
 
@@ -148,14 +140,17 @@ public class NodeParser implements Runnable {
 		// get both strings to lower
 		word = word.toLowerCase();
 		textBody = textBody.toLowerCase();
-		int i = 0;
+		int occurrence = 0;
 		// Use regex to detect s - ref : https://stackoverflow.com/questions/22566503/count-the-number-of-occurrences-of-a-word-in-a-string
 		Pattern searchPattern = Pattern.compile(word);
 		Matcher findMatch = searchPattern.matcher(textBody);
 		while (findMatch.find()) {
-		    i++;
+			occurrence++;
 		}
-		return i;
+		if(occurrence > 20) {
+		index(word,occurrence);
+		}
+		return occurrence;
 	}
 	
 	/**
@@ -179,18 +174,13 @@ public class NodeParser implements Runnable {
 			headingText.append(h1);
 			System.out.println("HEADING --> " + h1);
 		}
-		//call this after building collection of headingtext
-		//headingScore += getFrequency(h1) * HEADING_WEIGHT;
-		//Break heading into words
 	      Pattern pattern = Pattern.compile("\\w+");
-	      //Creating a Matcher object
-	      Matcher matcher = pattern.matcher(headingText);
+ 	      Matcher matcher = pattern.matcher(headingText);
 	      System.out.println("IN");
 	      //need to filter out ignore words here
-	      //match each word with body text return highest word count
+	      //match each word with heading text return highest word count
 	      while(matcher.find()) {
-	    	  System.out.println(matcher.group());
-	  		  bodyScore = getFrequency(matcher.group(),headingText.toString()) * PARAGRAPH_WEIGHT;
+	  		  headingScore = getFrequency(matcher.group(),headingText.toString()) * HEADING_WEIGHT;
 	       }
 
 		System.out.println(closed.size() + " ---> " + title);
@@ -206,11 +196,10 @@ public class NodeParser implements Runnable {
 	        pattern = Pattern.compile("\\w+");
 	      //Creating a Matcher object
 	        matcher = pattern.matcher(bodyText);
-	      System.out.println("IN");
-	      //need to filter out ignore words here
+ 	      //need to filter out ignore words here
 	      //match each word with body text return highest word count
 	      while(matcher.find()) {
-	    	  System.out.println(matcher.group());
+	     
 	  		  bodyScore = getFrequency(matcher.group(),bodyText.toString()) * PARAGRAPH_WEIGHT;
 	       }
 
@@ -218,12 +207,7 @@ public class NodeParser implements Runnable {
 		catch(Exception e) {
 			
 		}
-		if(titleScore + headingScore + bodyScore > 5) {
-			getFuzzyHeuristic(titleScore, headingScore, bodyScore);
-		}
-		else {
-			System.out.println("irrelevant");
-		}
+		getFuzzyHeuristic(titleScore, headingScore, bodyScore);
 		return titleScore + headingScore + bodyScore;
 		
 	}
@@ -239,8 +223,8 @@ public class NodeParser implements Runnable {
 	 * This function gets the fuzzy heuristic score of the search, it loads the FCL file and scores the input 
 	 * according to rules defined in the FCL file.
 	 */
-	private int getFuzzyHeuristic(int title, int heading, int body) {
-		// load fuzzy inference systems in here
+	private Variable getFuzzyHeuristic(int title, int heading, int body) {
+		// load fuzzy inference systems in here also get string distance in here
 		FIS fis = FIS.load("./res/Frequency.fcl", true);
 		fis.setVariable("title", title);
 		fis.setVariable("heading", heading);
@@ -253,18 +237,16 @@ public class NodeParser implements Runnable {
 		Variable frequency = fb.getVariable("relevance");
 		// if(fuzzy score is high then call index on the title, headings and body)
 		System.out.println("SCORE : " + frequency);
-		// need to index index(title,heading,body);
 		// then return result
-		return 1;
+		return frequency;
 	}
 
 	public static void main(String[] args) throws IOException {
-		NodeParser p = new NodeParser("https://duckduckgo.com/html/?q=", "test");
-		p.process();
+		Worker w1 = new Worker("https://duckduckgo.com/html/?q=", "test");
+		w1.start();
 	}
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
+	public Map<String, Integer> getMap() {
+		return map;
 	}
+	 
 }

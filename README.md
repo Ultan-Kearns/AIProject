@@ -46,6 +46,8 @@ Below you can see how I fuzzified the rules and how title and heading require le
 		DEFAULT := 0; 
 ## Graph Traversal (AI traversal of nodes)
 Here I will explain which graph traversal algorithm(s) I used and why.
+
+I ignored pages that had a total score of less than 5 as I deemed these irrelevant, the pages deemed relevant were passed to the getfuzzyheuristic function where they were scored.
 ## Overall Result
 
 ## Additional Features

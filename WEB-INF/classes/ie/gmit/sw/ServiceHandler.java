@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletContext;
@@ -60,7 +61,9 @@ import ie.gmit.sw.ai.cloud.WordFrequency;
  * 
  */
 public class ServiceHandler extends HttpServlet{
- 
+	static String url = "https://duckduckgo.com/html/?q=";
+
+	static Map m;
 	private static final long serialVersionUID = 1L;
 	private String ignoreWords = null;
 	private File f;
@@ -76,14 +79,12 @@ public class ServiceHandler extends HttpServlet{
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.setContentType("text/html"); //Output the MIME type
 		PrintWriter out = resp.getWriter(); //Write out text. We can write out binary too and change the MIME type...
-		
-		//Initialise some request varuables with the submitted form info. These are local to this method and thread safe...
+	
+		//Initialise some request variables with the submitted form info. These are local to this method and thread safe...
 		String option = req.getParameter("cmbOptions"); //Change options to whatever you think adds value to your assignment...
 		String query = req.getParameter("query");
-
-		String url = "https://duckduckgo.com/html/?q=";
-		NodeParser p = new NodeParser(url, query);
-		out.print("<html><head><title>Artificial Intelligence Assignment - Ultan Kearns </title>");		
+ 
+ 		out.print("<html><head><title>Artificial Intelligence Assignment - Ultan Kearns </title>");		
 		out.print("<link rel=\"stylesheet\" href=\"includes/style.css\">");
 		
 		out.print("</head>");		
@@ -98,8 +99,8 @@ public class ServiceHandler extends HttpServlet{
 		out.print("<b>jsoup-1.12.1.jar</b> have already been added to the project.");	
 			
 		out.print("<p><fieldset><legend><h3>Result</h3></legend>");
-		
-		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(option,query));
+
+ 		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(option,query));
 		Arrays.sort(words, Comparator.comparing(WordFrequency::getFrequency, Comparator.reverseOrder()));
 		//Arrays.stream(words).forEach(System.out::println);
 
@@ -112,13 +113,13 @@ public class ServiceHandler extends HttpServlet{
 		BufferedImage cloud = placer.getImage(); //Get a handle on the word cloud graphic
 		out.print("<img src=\"data:image/png;base64," + encodeToString(cloud) + "\" alt=\"Word Cloud\">");
 		
-		
 		out.print("</fieldset>");	
 		out.print("<P>Maybe output some search stats here, e.g. max search depth, effective branching factor.....<p>");		
 		out.print("<a href=\"./\">Return to Start Page</a>");
 		out.print("</body>");	
 		out.print("</html>");	
-	}
+	 
+ 	}
  
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 	
@@ -129,10 +130,14 @@ public class ServiceHandler extends HttpServlet{
 	//using the options field from the form
 	private static WordFrequency[] getWordFrequencyKeyValue(String option,String query) throws IOException {
 		int value = Integer.parseInt(option);
+	 
 		WordFrequency[]  wf = new WordFrequency[value];
+		Worker w = new Worker("https://duckduckgo.com/html/?q=",query);
+		w.start();
 		for(int i = 0; i < wf.length; i++) {
-			wf[i] = new WordFrequency(query, 500);
+			wf[i] = new WordFrequency("test", 200);
 		}
+	
 		return wf;
 	}
 	
