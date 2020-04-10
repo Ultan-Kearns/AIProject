@@ -134,8 +134,16 @@ public class ServiceHandler extends HttpServlet{
 		WordFrequency[]  wf = new WordFrequency[value];
 		Worker w = new Worker("https://duckduckgo.com/html/?q=",query);
 		w.start();
-		for(int i = 0; i < wf.length; i++) {
-			wf[i] = new WordFrequency("test", 200);
+		try {
+			w.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Map<String, Integer> m = w.getWordMap();
+		 String test = String.valueOf(m.size());
+ 		for(int i = 0; i < wf.length; i++) {
+			wf[i] = new WordFrequency(w.getWordMap().toString(), 200);
 		}
 	
 		return wf;

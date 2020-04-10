@@ -34,7 +34,7 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
 public class NodeParser {
 	// change these only template best first search
 	// Code was adapted from Assignment workshop by Dr. John Healy GMIT
-	private static final int MAX = 100;
+	private static final int MAX = 5;
 	private static final int TITLE_WEIGHT = 100;
 	private static final int HEADING_WEIGHT = 20;
 	private static final int PARAGRAPH_WEIGHT = 1;
@@ -44,7 +44,7 @@ public class NodeParser {
 	private Set<String> closed = new ConcurrentSkipListSet<String>();
 	// get comparator
 	private Queue<DocumentNode> q = new PriorityQueue<>(Comparator.comparing(DocumentNode::getScore));
-	Map<String, Integer> map = new ConcurrentHashMap<>();
+	static Map<String, Integer> map = new ConcurrentHashMap<>();
 	/**
 	 * 
 	 * @param url
