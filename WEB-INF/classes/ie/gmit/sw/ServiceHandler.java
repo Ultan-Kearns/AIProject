@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletContext;
@@ -63,7 +64,7 @@ import ie.gmit.sw.ai.cloud.WordFrequency;
 public class ServiceHandler extends HttpServlet{
 	static String url = "https://duckduckgo.com/html/?q=";
 
-	static Map m;
+ 
 	private static final long serialVersionUID = 1L;
 	private String ignoreWords = null;
 	private File f;
@@ -114,7 +115,9 @@ public class ServiceHandler extends HttpServlet{
 		out.print("<img src=\"data:image/png;base64," + encodeToString(cloud) + "\" alt=\"Word Cloud\">");
 		
 		out.print("</fieldset>");	
-		out.print("<P>Maybe output some search stats here, e.g. max search depth, effective branching factor.....<p>");		
+		//search stats depth branching factor - not binary tree so branching depth is probably wrong leaving it in anyway
+		//for some reason java.math doesn't provide arbitrary logarithms?
+		out.print("<P><i><b>Nodes in tree: " + NodeParser.MAX + "</b></i><br/>" + " <i><b>Search Term: " + query + "</b></i><br/>" + "<i><b>Approximate Tree depth = " + Math.round(Math.log(NodeParser.MAX) / Math.log(2)) + "</b></i><br/>" + "<p>");		
 		out.print("<a href=\"./\">Return to Start Page</a>");
 		out.print("</body>");	
 		out.print("</html>");	
@@ -128,22 +131,23 @@ public class ServiceHandler extends HttpServlet{
 
 	//Place most frequent words on this list, this also sets the size of the array of words 
 	//using the options field from the form
-	private static WordFrequency[] getWordFrequencyKeyValue(String option,String query) throws IOException {
+	private WordFrequency[] getWordFrequencyKeyValue(String option,String query) throws IOException {
 		int value = Integer.parseInt(option);
 	 
 		WordFrequency[]  wf = new WordFrequency[value];
+
 		Worker w = new Worker("https://duckduckgo.com/html/?q=",query);
 		w.start();
 		try {
 			w.join();
+			 
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Map<String, Integer> m = w.getWordMap();
-		 String test = String.valueOf(m.size());
+		Map<String, Integer> test = new ConcurrentHashMap<String, Integer>(w.getMap());
  		for(int i = 0; i < wf.length; i++) {
-			wf[i] = new WordFrequency(w.getWordMap().toString(), 200);
+			wf[i] = new WordFrequency(test.toString(), 200);
 		}
 	
 		return wf;

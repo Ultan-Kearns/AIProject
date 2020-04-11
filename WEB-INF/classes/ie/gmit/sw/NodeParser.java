@@ -1,21 +1,19 @@
 package ie.gmit.sw;
 
 import java.io.IOException;
-import java.util.Comparator;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import net.sourceforge.jFuzzyLogic.rule.Variable;
@@ -29,21 +27,21 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
  * NEED TO DO: 
  * 1. Get most occurring words in html body, title, text(Almost done have words broken up  just need to score them based on occurrence.
  * 2. Get distance between strings in words
- * 3. Use BFS, DFS, or Breadth First Search when navigating tree or graph
+ * 3. Use BFS, DFS, or Breadth First Search when navigating tree or graph(Done - depth first search_
  */
 public class NodeParser {
 	// change these only template best first search
 	// Code was adapted from Assignment workshop by Dr. John Healy GMIT
-	private static final int MAX = 5;
+	protected static final int MAX = 100;
 	private static final int TITLE_WEIGHT = 100;
 	private static final int HEADING_WEIGHT = 20;
 	private static final int PARAGRAPH_WEIGHT = 1;
-	private String title;
-	private String term;
+ 	private String term;
 	// for
 	private Set<String> closed = new ConcurrentSkipListSet<String>();
 	// get comparator
-	private Queue<DocumentNode> q = new PriorityQueue<>(Comparator.comparing(DocumentNode::getScore));
+	//Should be thread safe since each thread maintains its own list
+	private List<DocumentNode> q = Collections.synchronizedList(new LinkedList<DocumentNode>());
 	static Map<String, Integer> map = new ConcurrentHashMap<>();
 	/**
 	 * 
@@ -60,8 +58,8 @@ public class NodeParser {
 		int score = getHeuristicScore(doc);
 		// for tracking
 		closed.add(url);
-		// put new document on queue
-		q.offer(new DocumentNode(doc, score));
+		// put new document at end of list 
+		q.add(new DocumentNode(doc, score));
  
 
 		// TODO Auto-generated constructor stub
@@ -71,7 +69,7 @@ public class NodeParser {
 	 */
 	public void process() {
 		while (!q.isEmpty() && closed.size() <= MAX) {
-			DocumentNode node = q.poll();
+			DocumentNode node = q.get(q.size() - 1);
 			Document doc = node.getDocument();
 			Elements edges = doc.select("a[href]"); // a with href
 			for (Element e : edges) {
@@ -82,13 +80,15 @@ public class NodeParser {
 					Document child;
 					try {
 						closed.add(link);
+						//fails here if test is query
 						child = Jsoup.connect(link).get();
 						int score = getHeuristicScore(child);
 						System.out.println("CHILD TITLE: " + child.title());
-						if(score > 10) {
-							q.offer(new DocumentNode(child, score));
+						if(score > 5) {
+							q.add(new DocumentNode(child, score));
 						}
 					} catch (IOException e1) {
+						System.out.println("CAUGHT");
 					}
 				}
 			}
@@ -109,6 +109,8 @@ public class NodeParser {
 
 	private class DocumentNode {
 		private Document document;
+		//says it's unused but is used and the warnings are annoying.
+		@SuppressWarnings("unused")
 		private int score;
 
 		public DocumentNode(Document d, int score) {
@@ -119,14 +121,6 @@ public class NodeParser {
 
 		public Document getDocument() {
 			return document;
-		}
-
-		public int getScore() {
-			return score;
-		}
-
-		public void setScore(int score) {
-			this.score = score;
 		}
 
 	}
@@ -241,9 +235,15 @@ public class NodeParser {
 		return frequency;
 	}
 
-	public static void main(String[] args) throws IOException {
-		Worker w1 = new Worker("https://duckduckgo.com/html/?q=", "test");
+	public static void main(String[] args) throws IOException, InterruptedException {
+		
+		//create + start worker thread
+		Worker w1 = new Worker("https://duckduckgo.com/html/?q=", "aaaaaaa");
 		w1.start();
+		//wait for thread to die
+		w1.join();
+		System.out.println("TEST" + w1.getMap());
+		
 	}
 	public Map<String, Integer> getMap() {
 		return map;

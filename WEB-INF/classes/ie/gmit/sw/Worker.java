@@ -3,14 +3,20 @@ package ie.gmit.sw;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-public class Worker extends Thread implements Runnable{
+/*
+ * This is a worker class that will be used to create threads
+ * these threads will each call a nodeparser to parse the nodes 
+ * and navigate the tree to find the 20 most frequent words 
+ * associated with a certain topic
+ * This class extends thread
+ */
+public class Worker extends Thread{
 	String url,term;
-	Map <String,Integer> wordMap;
+	Map <String,Integer> wordMap = new ConcurrentHashMap<String, Integer>();
 	public Worker(String url, String term) {
 		this.term = term;
 		this.url = url;
-		wordMap = new ConcurrentHashMap<String, Integer>();
+		
 	}
  	public void run() {
 		NodeParser p;
@@ -19,13 +25,13 @@ public class Worker extends Thread implements Runnable{
 			p = new NodeParser(url, term);
 			p.process();
 			wordMap = p.getMap();
-		} catch (IOException e) {
+ 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	}
- 	public Map<String,Integer> getWordMap() {
+ 	public   Map<String, Integer> getMap() {
  		return wordMap;
  	}
 }
