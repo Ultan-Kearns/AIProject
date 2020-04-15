@@ -128,5 +128,6 @@ Here is the class that instantiates a new Thread it extends the class Thread and
 + MultiThreading was implemented - used the worker class see multithreaded section
 + Got some output currently
 
-## Additional Features
+## Extras
 + Able to specify what number of words you want to appear on screen
++ Uses DFS(Depth first search)

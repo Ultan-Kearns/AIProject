@@ -29,9 +29,10 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
  */
 /*
  * NEED TO DO: 
- * 1. Get most occurring words in html body, title, text(Almost done have words broken up  just need to score them based on occurrence.
+ * 1. Get most occurring words in html body, title, text(Done)
  * 2. Get distance between strings in words
  * 3. Use BFS, DFS, or Breadth First Search when navigating tree or graph(Done - depth first search_
+ * 4. Get output to image
  */
 public class NodeParser {
 	// change these only template best first search
@@ -207,9 +208,13 @@ public class NodeParser {
 		catch(Exception e) {
 			
 		}
-		getFuzzyHeuristic(titleScore, headingScore, bodyScore);
+		//check if the fuzzy heuristic is good
+		if(getFuzzyHeuristic(titleScore, headingScore, bodyScore) > 8) {
 		return titleScore + headingScore + bodyScore;
-		
+		}
+		else {
+			return 0;
+		}
 	}
 
 	// INCLUDE JFUZZY LOGIC CODE HERE
@@ -223,7 +228,7 @@ public class NodeParser {
 	 * This function gets the fuzzy heuristic score of the search, it loads the FCL file and scores the input 
 	 * according to rules defined in the FCL file.
 	 */
-	private Variable getFuzzyHeuristic(int title, int heading, int body) {
+	private double getFuzzyHeuristic(int title, int heading, int body) {
 		// load fuzzy inference systems in here also get string distance in here
 		FIS fis = FIS.load("./res/Frequency.fcl", true);
 		fis.setVariable("title", title);
@@ -236,9 +241,9 @@ public class NodeParser {
 		// frequent then score is high
 		Variable frequency = fb.getVariable("relevance");
 		// if(fuzzy score is high then call index on the title, headings and body)
-		System.out.println("SCORE : " + frequency);
+		System.out.println("SCORE : " + frequency.defuzzify());
 		// then return result
-		return frequency;
+		return frequency.defuzzify();
 	}
 	public static StringBuffer ignore() throws IOException {
 		//create list of ignore words 
