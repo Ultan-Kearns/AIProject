@@ -64,7 +64,8 @@ import ie.gmit.sw.ai.cloud.WordFrequency;
 public class ServiceHandler extends HttpServlet{
 	static String url = "https://duckduckgo.com/html/?q=";
 
- 
+	Map<String, Integer> test = new ConcurrentHashMap<String, Integer>();
+
 	private static final long serialVersionUID = 1L;
 	private String ignoreWords = null;
 	private File f;
@@ -84,7 +85,6 @@ public class ServiceHandler extends HttpServlet{
 		//Initialise some request variables with the submitted form info. These are local to this method and thread safe...
 		String option = req.getParameter("cmbOptions"); //Change options to whatever you think adds value to your assignment...
 		String query = req.getParameter("query");
- 
  		out.print("<html><head><title>Artificial Intelligence Assignment - Ultan Kearns </title>");		
 		out.print("<link rel=\"stylesheet\" href=\"includes/style.css\">");
 		
@@ -135,19 +135,19 @@ public class ServiceHandler extends HttpServlet{
 		int value = Integer.parseInt(option);
 	 
 		WordFrequency[]  wf = new WordFrequency[value];
-
-		Worker w = new Worker("https://duckduckgo.com/html/?q=",query);
+		Worker w = new Worker(url,query);
 		w.start();
 		try {
 			w.join();
+			test = w.wordMap;
 			 
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Map<String, Integer> test = new ConcurrentHashMap<String, Integer>(w.getMap());
+	
  		for(int i = 0; i < wf.length; i++) {
-			wf[i] = new WordFrequency(test.toString(), 200);
+			wf[i] = new WordFrequency(String.valueOf(w.wordMap.size()), 5);
 		}
 	
 		return wf;

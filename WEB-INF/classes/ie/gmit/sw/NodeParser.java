@@ -1,5 +1,7 @@
 package ie.gmit.sw;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -10,10 +12,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import net.sourceforge.jFuzzyLogic.rule.Variable;
@@ -32,17 +36,19 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
 public class NodeParser {
 	// change these only template best first search
 	// Code was adapted from Assignment workshop by Dr. John Healy GMIT
-	protected static final int MAX = 100;
+	protected static final int MAX = 50;
 	private static final int TITLE_WEIGHT = 100;
 	private static final int HEADING_WEIGHT = 20;
 	private static final int PARAGRAPH_WEIGHT = 1;
  	private String term;
-	// for
+ 	// for
 	private Set<String> closed = new ConcurrentSkipListSet<String>();
 	// get comparator
 	//Should be thread safe since each thread maintains its own list
 	private List<DocumentNode> q = Collections.synchronizedList(new LinkedList<DocumentNode>());
-	static Map<String, Integer> map = new ConcurrentHashMap<>();
+	Map<String, Integer> map = new ConcurrentHashMap<>();
+	//read in ignore words
+	StringBuffer ignoreWords = ignore();
 	/**
 	 * 
 	 * @param url
@@ -101,10 +107,11 @@ public class NodeParser {
 	 * @return
 	 * this function will return a map of the text
 	 */
-	private Map<String, Integer> index(String text,int frequency) {
-		//put word and number of occurrences into map	 
+	private void index(String text,int frequency) {
+		//put word and number of occurrences into map only need 20 words may change for options
+		if(map.size() < 20 && 	ignoreWords.toString().contains(text) == false) {
 		map.put(text,frequency); 
-		return map;
+		} 
 	}
 
 	private class DocumentNode {
@@ -141,7 +148,7 @@ public class NodeParser {
 		while (findMatch.find()) {
 			occurrence++;
 		}
-		if(occurrence > 20) {
+		if(occurrence > 5 ) {
 		index(word,occurrence);
 		}
 		return occurrence;
@@ -193,7 +200,6 @@ public class NodeParser {
  	      //need to filter out ignore words here
 	      //match each word with body text return highest word count
 	      while(matcher.find()) {
-	     
 	  		  bodyScore = getFrequency(matcher.group(),bodyText.toString()) * PARAGRAPH_WEIGHT;
 	       }
 
@@ -234,19 +240,37 @@ public class NodeParser {
 		// then return result
 		return frequency;
 	}
-
+	public static StringBuffer ignore() throws IOException {
+		//create list of ignore words 
+		StringBuffer ignore = new StringBuffer();
+		//read file
+		FileReader in = new FileReader("./res/ignorewords.txt");
+		BufferedReader br = new BufferedReader(in);
+		//append buffer
+		String line = "";
+		while((line = br.readLine()) != null) {
+			ignore.append(line + "\n");
+		}
+		//close file
+		br.close();
+		System.out.println("IGNORE " + ignore);
+		return ignore;
+	}
 	public static void main(String[] args) throws IOException, InterruptedException {
 		
-		//create + start worker thread
-		Worker w1 = new Worker("https://duckduckgo.com/html/?q=", "aaaaaaa");
+		//create + start worker threads
+		//testing multithreading works
+ 
+		Worker w1 = new Worker("https://duckduckgo.com/html/?q=", "byzantium");
+		Worker w2 = new Worker("https://duckduckgo.com/html/?q=", "test");
 		w1.start();
-		//wait for thread to die
+		w2.start();
 		w1.join();
-		System.out.println("TEST" + w1.getMap());
+		w2.join();
+		Map<String, Integer> test = new ConcurrentHashMap<String, Integer>(w1.wordMap);
+		System.out.println("most occuring words" + test.toString());
 		
-	}
-	public Map<String, Integer> getMap() {
-		return map;
-	}
+	} 
+ 
 	 
 }
