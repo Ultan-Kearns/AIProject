@@ -12,31 +12,31 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Worker extends Thread{
 	String url,term;
-	 Map <String,Integer> wordMap;
-	public Worker(String url, String term) {
+	 Map <String,Integer> wordMap = new ConcurrentHashMap<String, Integer>();
+ 	public Worker(String url, String term) {
 		this.term = term;
 		this.url = url;
-		
 	}
  	public void run() {
  		 
 		NodeParser p = null;
 		System.out.println("IN");
-		wordMap = new ConcurrentHashMap<String, Integer>();
 
 		try {
 			//fails when called from service handler
-			p = new NodeParser("https://duckduckgo.com/html/?q=", term);
+			p = new NodeParser(url, term);
 			p.process();
-			wordMap.putAll(p.map);
+			wordMap = p.getMap();
  
  		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			wordMap.put("Y",100);
+			wordMap.put("error",100);
 		}
- 
-
+		
 	}
- 	
+ 	public Map<String,Integer> getMap() {
+ 		return wordMap;
+ 	}
+ 
 }

@@ -24,28 +24,49 @@ The output of these inputs is relevance, this output will determine the overall 
 The way I have these rules setup conveys to the user that the title is worth more than the heading and body, the heading is worth less than title but is worth more than the body, and the body is worth less than both the heading and title.  So therefore the body would require a higher frequency of the words occurrence to be considered relevant than the heading or the title.  This is due to the fact that if a word appears in a heading or title it must be more relevant than a word that appears in the body.
 
 Below you can see how I fuzzified the rules and how title and heading require less occurrences than that of body to be considered relevant to the user.
-
-	FUZZIFY title
-		TERM infrequent := (0,1)(2,0);
-		TERM nominal :=  (1,0)(2,1)(6,0);
-		TERM frequent :=  (4,0)(10,1); 
-	END_FUZZIFY 
-	FUZZIFY heading 
-		TERM infrequent := (0,1)(2,0);
-		TERM nominal :=  (1,0)(3,1)(4,0);
-		TERM frequent := (3,0)(6,1); 
-	END_FUZZIFY
-	FUZZIFY body 
-		TERM infrequent := (0,1)(5,0);
-		TERM nominal := (3,0)(6,1)(12,0);
-		TERM frequent :=  (10,0)(20,1); 
-	END_FUZZIFY
-	DEFUZZIFY relevance
-		TERM low := (0,1) (5,0);
-		TERM normal :=(5,0)(10,1)(15,0);
-		TERM high := (15,0)(20,1);
-		METHOD : COG;
-		DEFAULT := 0; 
+	
+	FUNCTION_BLOCK frequency
+		// Here we define the inputs which we consider necessary to compute the output
+		// Title, heading and body will all be analyzed
+		VAR_INPUT
+			title : REAL; 
+			heading : REAL; 
+			body: REAL;
+		END_VAR
+		//define output named relevance, how relevant will the word be?
+		VAR_OUTPUT
+			relevance : REAL; 
+		END_VAR
+		// title is worth more than heading and body
+		// words here can be sparse but still considered relevant
+		FUZZIFY title
+			TERM infrequent := (100,1)(200,1)(300,0);
+			TERM nominal :=  (200,0)(300,1)(400,0);
+			TERM frequent :=  (300,0)(400,1)(500,1); 
+		END_FUZZIFY 
+		// heading is worth less than title but more than body
+		// words here most appear more frequently than title to be considered relevant
+		// but words can appear less times than in body and be considered relevant
+		FUZZIFY heading 
+			TERM infrequent := (0,1)(20,0);
+			TERM nominal :=  (0,0)(10,0)(20,1)(30,0);
+			TERM frequent := (0,0)(20,0)(40,1); 
+		END_FUZZIFY
+		//body is worth less than both heading and title 
+		//and words most appear more frequently here to be considered relevant
+		FUZZIFY body 
+			TERM infrequent := (0,1)(30,1)(50,0);
+			TERM nominal := (40,0)(55,1)(80,0);
+			TERM frequent :=  (70,0)(100,1); 
+		END_FUZZIFY
+		//relevance is determined by the rules
+		DEFUZZIFY relevance
+			TERM low := (0,1)(30,1) (50,0);
+			TERM normal :=(40,0)(70,1)(80,0);
+			TERM high := (70,0)(90,1);
+			METHOD : COG;
+			DEFAULT := 0; 
+		END_DEFUZZIFY
 ## Graph Traversal (AI traversal of nodes)
 Here I will explain which graph traversal algorithm(s) I used and why.
 
@@ -126,8 +147,11 @@ Here is the class that instantiates a new Thread it extends the class Thread and
 ## Overall Result
 + Depth first search was implemented using a doubly linked list - it's a list thats linked....doubly
 + MultiThreading was implemented - used the worker class see multithreaded section
++ Ignore words are filtered from returned String, Int map
++ Uses defuzzified value to output the result
 + Got some output currently
 
 ## Extras
 + Able to specify what number of words you want to appear on screen
-+ Uses DFS(Depth first search)
++ Uses DFS(Depth first search) by adding searchterms to the end of a list
++ Can use custom ignore file by passing string arg to ignore function

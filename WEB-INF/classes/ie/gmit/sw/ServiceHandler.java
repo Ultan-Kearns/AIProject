@@ -64,16 +64,21 @@ import ie.gmit.sw.ai.cloud.WordFrequency;
 public class ServiceHandler extends HttpServlet{
 	static String url = "https://duckduckgo.com/html/?q=";
 
-	Map<String, Integer> test = new ConcurrentHashMap<String, Integer>();
 
 	private static final long serialVersionUID = 1L;
 	private String ignoreWords = null;
 	private File f;
-	
+	private Map<String, Integer> test = null;
 	public void init() throws ServletException {
 		ServletContext ctx = getServletContext(); //Get a handle on the application context
 		
 		//Reads the value from the <context-param> in web.xml
+		/*
+		 * Redundant as I filter ignore words in nodeparser as each searchterm may need a different file
+		 * for ignoring words say I were to search rome but wanted to exclude some well known prominent 
+		 * Romans, I could use an ignore file with the words Cassius, Lepidus, Anthony etc. 
+		 * more efficient
+		 */
 		ignoreWords = getServletContext().getRealPath(File.separator) + ctx.getInitParameter("IGNORE_WORDS_FILE_LOCATION"); 
 		f = new File(ignoreWords); //A file wrapper around the ignore words...
 	}
@@ -100,7 +105,19 @@ public class ServiceHandler extends HttpServlet{
 		out.print("<b>jsoup-1.12.1.jar</b> have already been added to the project.");	
 			
 		out.print("<p><fieldset><legend><h3>Result</h3></legend>");
-
+		
+		Worker w = new Worker(url,"test");
+ 
+	 
+		try {
+			w.run();
+			w.join();
+			test = new ConcurrentHashMap<String, Integer>(w.getMap());
+			 
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
  		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(option,query));
 		Arrays.sort(words, Comparator.comparing(WordFrequency::getFrequency, Comparator.reverseOrder()));
 		//Arrays.stream(words).forEach(System.out::println);
@@ -133,21 +150,9 @@ public class ServiceHandler extends HttpServlet{
 	//using the options field from the form
 	private WordFrequency[] getWordFrequencyKeyValue(String option,String query) throws IOException {
 		int value = Integer.parseInt(option);
-	 
-		WordFrequency[]  wf = new WordFrequency[value];
-		Worker w = new Worker(url,query);
-		w.start();
-		try {
-			w.join();
-			test = w.wordMap;
-			 
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
+		WordFrequency[]  wf = new WordFrequency[value]; 
  		for(int i = 0; i < wf.length; i++) {
-			wf[i] = new WordFrequency(String.valueOf(w.wordMap.size()), 5);
+			wf[i] = new WordFrequency(String.valueOf(test.size()), 5);
 		}
 	
 		return wf;
@@ -184,4 +189,22 @@ public class ServiceHandler extends HttpServlet{
 	    }
 	    return image;
 	}
+	public static void main(String[] args) {
+		Worker w = new Worker(url,"rome");
+		Map<String, Integer> test = null;
+
+		try {
+			w.run();
+			w.join();
+			test = new ConcurrentHashMap<String, Integer>();
+			test.putAll(w.getMap());
+			 
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+ 
+		System.out.println(test.size());
+	}
+ 
 }

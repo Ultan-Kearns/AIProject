@@ -37,7 +37,7 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
 public class NodeParser {
 	// change these only template best first search
 	// Code was adapted from Assignment workshop by Dr. John Healy GMIT
-	protected static final int MAX = 50;
+	protected static final int MAX = 100;
 	private static final int TITLE_WEIGHT = 100;
 	private static final int HEADING_WEIGHT = 20;
 	private static final int PARAGRAPH_WEIGHT = 1;
@@ -49,7 +49,7 @@ public class NodeParser {
 	private List<DocumentNode> q = Collections.synchronizedList(new LinkedList<DocumentNode>());
 	Map<String, Integer> map = new ConcurrentHashMap<>();
 	//read in ignore words
-	StringBuffer ignoreWords = ignore();
+	StringBuffer ignoreWords = ignore("./res/ignorewords.txt");
 	/**
 	 * 
 	 * @param url
@@ -108,10 +108,10 @@ public class NodeParser {
 	 * @return
 	 * this function will return a map of the text
 	 */
-	private void index(String text,int frequency) {
+	private void index(String text,int index) {
 		//put word and number of occurrences into map only need 20 words may change for options
 		if(map.size() < 20 && 	ignoreWords.toString().contains(text) == false) {
-		map.put(text,frequency); 
+		map.put(text,index); 
 		} 
 	}
 
@@ -150,7 +150,7 @@ public class NodeParser {
 			occurrence++;
 		}
 		if(occurrence > 5 ) {
-		index(word,occurrence);
+		index(word,map.size());
 		}
 		return occurrence;
 	}
@@ -209,7 +209,7 @@ public class NodeParser {
 			
 		}
 		//check if the fuzzy heuristic is good
-		if(getFuzzyHeuristic(titleScore, headingScore, bodyScore) > 8) {
+		if(getFuzzyHeuristic(titleScore, headingScore, bodyScore) > 100) {
 		return titleScore + headingScore + bodyScore;
 		}
 		else {
@@ -241,15 +241,16 @@ public class NodeParser {
 		// frequent then score is high
 		Variable frequency = fb.getVariable("relevance");
 		// if(fuzzy score is high then call index on the title, headings and body)
+		System.out.println(frequency);
 		System.out.println("SCORE : " + frequency.defuzzify());
 		// then return result
 		return frequency.defuzzify();
 	}
-	public static StringBuffer ignore() throws IOException {
+	public static StringBuffer ignore(String file) throws IOException {
 		//create list of ignore words 
 		StringBuffer ignore = new StringBuffer();
-		//read file
-		FileReader in = new FileReader("./res/ignorewords.txt");
+		//read file - can change this to whatever you like
+		FileReader in = new FileReader(file);
 		BufferedReader br = new BufferedReader(in);
 		//append buffer
 		String line = "";
@@ -272,10 +273,12 @@ public class NodeParser {
 		w2.start();
 		w1.join();
 		w2.join();
-		Map<String, Integer> test = new ConcurrentHashMap<String, Integer>(w1.wordMap);
+		Map<String, Integer> test = new ConcurrentHashMap<String, Integer>(w2.getMap());
 		System.out.println("most occuring words" + test.toString());
 		
 	} 
  
-	 
+	public Map<String, Integer> getMap(){
+		return map;
+	}
 }

@@ -25,30 +25,30 @@ FUNCTION_BLOCK frequency
 	// title is worth more than heading and body
 	// words here can be sparse but still considered relevant
 	FUZZIFY title
-		TERM infrequent := (0,1)(2,0);
-		TERM nominal :=  (1,0)(2,1)(6,0);
-		TERM frequent :=  (4,0)(10,1); 
+		TERM infrequent := (100,1)(200,1)(300,0);
+		TERM nominal :=  (200,0)(300,1)(400,0);
+		TERM frequent :=  (300,0)(400,1)(500,1); 
 	END_FUZZIFY 
 	// heading is worth less than title but more than body
 	// words here most appear more frequently than title to be considered relevant
 	// but words can appear less times than in body and be considered relevant
 	FUZZIFY heading 
-		TERM infrequent := (0,1)(2,0);
-		TERM nominal :=  (1,0)(3,1)(4,0);
-		TERM frequent := (3,0)(6,1); 
+		TERM infrequent := (0,1)(20,0);
+		TERM nominal :=  (0,0)(10,0)(20,1)(30,0);
+		TERM frequent := (0,0)(20,0)(40,1); 
 	END_FUZZIFY
 	//body is worth less than both heading and title 
 	//and words most appear more frequently here to be considered relevant
 	FUZZIFY body 
-		TERM infrequent := (0,1)(5,0);
-		TERM nominal := (3,0)(6,1)(12,0);
-		TERM frequent :=  (10,0)(20,1); 
+		TERM infrequent := (0,1)(30,1)(50,0);
+		TERM nominal := (40,0)(55,1)(80,0);
+		TERM frequent :=  (70,0)(100,1); 
 	END_FUZZIFY
 	//relevance is determined by the rules
 	DEFUZZIFY relevance
-		TERM low := (0,1) (5,0);
-		TERM normal :=(5,0)(10,1)(15,0);
-		TERM high := (15,0)(20,1);
+		TERM low := (0,1)(30,1) (50,0);
+		TERM normal :=(40,0)(60,1)(80,0);
+		TERM high := (70,0)(90,1);
 		METHOD : COG;
 		DEFAULT := 0; 
 	END_DEFUZZIFY
