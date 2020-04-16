@@ -37,7 +37,7 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
 public class NodeParser {
 	// change these only template best first search
 	// Code was adapted from Assignment workshop by Dr. John Healy GMIT
-	protected static final int MAX = 100;
+	protected static final int MAX = 20;
 	private static final int TITLE_WEIGHT = 100;
 	private static final int HEADING_WEIGHT = 20;
 	private static final int PARAGRAPH_WEIGHT = 1;
@@ -208,8 +208,8 @@ public class NodeParser {
 		catch(Exception e) {
 			
 		}
-		//check if the fuzzy heuristic is good
-		if(getFuzzyHeuristic(titleScore, headingScore, bodyScore) > 100) {
+		//check if the fuzzy heuristic is normal
+		if(getFuzzyHeuristic(titleScore, headingScore, bodyScore) > 60) {
 		return titleScore + headingScore + bodyScore;
 		}
 		else {
@@ -267,7 +267,7 @@ public class NodeParser {
 		//create + start worker threads
 		//testing multithreading works
  
-		Worker w1 = new Worker("https://duckduckgo.com/html/?q=", "byzantium");
+		Worker w1 = new Worker("https://duckduckgo.com/html/?q=", "hello");
 		Worker w2 = new Worker("https://duckduckgo.com/html/?q=", "test");
 		w1.start();
 		w2.start();

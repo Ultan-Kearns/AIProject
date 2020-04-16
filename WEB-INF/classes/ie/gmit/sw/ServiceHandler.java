@@ -204,7 +204,7 @@ public class ServiceHandler extends HttpServlet{
 			e.printStackTrace();
 		}
  
-		System.out.println(test.size());
+		System.out.println(test.toString());
 	}
  
 }
