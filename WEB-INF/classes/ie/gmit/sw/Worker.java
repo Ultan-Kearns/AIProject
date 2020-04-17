@@ -33,7 +33,7 @@ public class Worker extends Thread{
  		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			wordMap.put("Error",100);
+			wordMap.put(e.toString(),100);
 		}
 		
 	}

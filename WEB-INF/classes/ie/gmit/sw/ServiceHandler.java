@@ -108,7 +108,16 @@ public class ServiceHandler extends HttpServlet{
 			
 		out.print("<p><fieldset><legend><h3>Result</h3></legend>");
 
- 		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(option,query));
+ 		WordFrequency[] words = null;
+		try {
+			words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(option,query));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		Arrays.sort(words, Comparator.comparing(WordFrequency::getFrequency, Comparator.reverseOrder()));
 		//Arrays.stream(words).forEach(System.out::println);
 
@@ -138,15 +147,17 @@ public class ServiceHandler extends HttpServlet{
 
 	//Place most frequent words on this list, this also sets the size of the array of words 
 	//using the options field from the form
-	private WordFrequency[] getWordFrequencyKeyValue(String option,String query) throws IOException {
+	private WordFrequency[] getWordFrequencyKeyValue(String option,String query) throws IOException, InterruptedException {
 		int value = Integer.parseInt(option);
 		
 		Worker w = new Worker(url,"test",wordNum);
-	
+		w.run();
+		w.join();
+		test = new ConcurrentHashMap<String, Integer>(w.wordMap);
 		WordFrequency[]  wf = new WordFrequency[value]; 
  		for(int i = 0; i < wf.length; i++) {
 			//wf[i] = new WordFrequency(test.keySet().toArray()[i].toString(),(int)test.values().toArray()[i]);
- 			wf[i] = new WordFrequency("A",1);
+ 			wf[i] = new WordFrequency(test.keySet().toString(),65);
 
 		}
 	
@@ -186,7 +197,7 @@ public class ServiceHandler extends HttpServlet{
 	}
 	public static void main(String[] args) {
 		
-		Worker w = new Worker(url,"Emperor Caracella",20);
+		Worker w = new Worker(url,"Gallic Wars",20);
 		Map<String, Integer> test = null;
 
 		try {
@@ -198,7 +209,8 @@ public class ServiceHandler extends HttpServlet{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(test.toString());
+		//for some reason I cannot get output to the image
+		System.out.println("TOP WORDS: " + test.toString());
 		System.out.println(test.keySet().toArray()[1].toString());
 		System.out.println((int)test.values().toArray()[1]);
 	}

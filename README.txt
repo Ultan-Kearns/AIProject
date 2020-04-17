@@ -1,5 +1,12 @@
 <center><h1>AI Word Cloud by Ultan Kearns - G00343745 GMIT</h1></center>
 
+# Important notes
++ Multi-threaded
++ No output for image but can run the main method in service handler and retrieve the results
++ All results filtered with ignore file
++ uses depth first search using doubly linked list
++ Heuristics are applied and results are output based on fuzzy heuristic
+
 # About Project
 + This project was made under the supervision of Dr. John Healy for the fourth year module Artificial Intelligence.
 + This project was made by myself(Ultan Kearns) using resources from Dr. John Healy.
@@ -152,7 +159,6 @@ Here is the class that instantiates a new Thread it extends the class Thread and
 + Program outputs expected results but cannot decode them to image 
 
 ## Tests
-
 ### Top 20 words for:
 + Caracella:  {roman=9, father=9, used=8, dio=22, end=14, severus=12, caracalla=61, 11=9, new=6, 1=75, 2=91, 3=18, 4=12, emperor=31, 8=12, name=7, geta=10, brother=12, 20=15, age=20}
 + Marcus Aurelius: {stoic=10, 26=14, roman=45, april=6, good=8, life=21, augustus=8, known=12, aurelius=23, emperors=20, latin=7, antoninus=55, philosopher=11, 17=24, 161=16, march=7, marcus=215, 1=345, emperor=50, li=261}

@@ -30,7 +30,7 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
 /*
  * NEED TO DO: 
  * 1. Get most occurring words in html body, title, text(Done)
- * 2. Get distance between strings in words
+ * 2. Get distance between strings in words(REDUNDANT)
  * 3. Use BFS, DFS, or Breadth First Search when navigating tree or graph(Done - depth first search_
  * 4. Get output to image
  */
@@ -97,7 +97,7 @@ public class NodeParser {
 							q.add(new DocumentNode(child, score));
 						}
 					} catch (IOException e1) {
-						System.out.println("CAUGHT");
+				 
 					}
 				}
 			}
@@ -269,18 +269,6 @@ public class NodeParser {
 		System.out.println("IGNORE " + ignore);
 		return ignore;
 	}
-	public static void main(String[] args) throws IOException, InterruptedException {
-		
-		//create + start worker threads
-		//testing multithreading works
- 
-		Worker w1 = new Worker("https://duckduckgo.com/html/?q=", "Triumverate",30);
- 		w1.start();
- 		w1.join();
- 		Map<String, Integer> test = new ConcurrentHashMap<String, Integer> (w1.getMap());
-		System.out.println("most occuring words" + test.toString());
-		
-	} 
  
 	public Map<String, Integer>  getMap(){
 		return map;
