@@ -69,6 +69,7 @@ public class ServiceHandler extends HttpServlet{
 	private String ignoreWords = null;
 	private File f;
 	private Map<String, Integer> test = null;
+	private int wordNum;
 	public void init() throws ServletException {
 		ServletContext ctx = getServletContext(); //Get a handle on the application context
 		
@@ -89,6 +90,7 @@ public class ServiceHandler extends HttpServlet{
 	
 		//Initialise some request variables with the submitted form info. These are local to this method and thread safe...
 		String option = req.getParameter("cmbOptions"); //Change options to whatever you think adds value to your assignment...
+		this.wordNum = Integer.parseInt(option); // get number from options
 		String query = req.getParameter("query");
  		out.print("<html><head><title>Artificial Intelligence Assignment - Ultan Kearns </title>");		
 		out.print("<link rel=\"stylesheet\" href=\"includes/style.css\">");
@@ -105,19 +107,7 @@ public class ServiceHandler extends HttpServlet{
 		out.print("<b>jsoup-1.12.1.jar</b> have already been added to the project.");	
 			
 		out.print("<p><fieldset><legend><h3>Result</h3></legend>");
-		
-		Worker w = new Worker(url,"test");
- 
-	 
-		try {
-			w.run();
-			w.join();
-			test = new ConcurrentHashMap<String, Integer>(w.getMap());
-			 
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
  		WordFrequency[] words = new WeightedFont().getFontSizes(getWordFrequencyKeyValue(option,query));
 		Arrays.sort(words, Comparator.comparing(WordFrequency::getFrequency, Comparator.reverseOrder()));
 		//Arrays.stream(words).forEach(System.out::println);
@@ -150,9 +140,14 @@ public class ServiceHandler extends HttpServlet{
 	//using the options field from the form
 	private WordFrequency[] getWordFrequencyKeyValue(String option,String query) throws IOException {
 		int value = Integer.parseInt(option);
+		
+		Worker w = new Worker(url,"test",wordNum);
+	
 		WordFrequency[]  wf = new WordFrequency[value]; 
  		for(int i = 0; i < wf.length; i++) {
-			wf[i] = new WordFrequency(String.valueOf(test.size()), 5);
+			//wf[i] = new WordFrequency(test.keySet().toArray()[i].toString(),(int)test.values().toArray()[i]);
+ 			wf[i] = new WordFrequency("A",1);
+
 		}
 	
 		return wf;
@@ -190,21 +185,22 @@ public class ServiceHandler extends HttpServlet{
 	    return image;
 	}
 	public static void main(String[] args) {
-		Worker w = new Worker(url,"rome");
+		
+		Worker w = new Worker(url,"Emperor Caracella",20);
 		Map<String, Integer> test = null;
 
 		try {
 			w.run();
 			w.join();
-			test = new ConcurrentHashMap<String, Integer>();
-			test.putAll(w.getMap());
+			test = new ConcurrentHashMap<String, Integer> (w.getMap());
 			 
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
- 
 		System.out.println(test.toString());
+		System.out.println(test.keySet().toArray()[1].toString());
+		System.out.println((int)test.values().toArray()[1]);
 	}
  
 }

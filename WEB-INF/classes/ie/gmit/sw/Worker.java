@@ -11,11 +11,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * This class extends thread
  */
 public class Worker extends Thread{
-	String url,term;
-	 Map <String,Integer> wordMap = new ConcurrentHashMap<String, Integer>();
- 	public Worker(String url, String term) {
+	private String url,term;
+	private int wordNum = 0;
+	 Map <String, Integer>  wordMap = new ConcurrentHashMap<String, Integer>();
+ 	public Worker(String url, String term,int numberOfWords) {
 		this.term = term;
 		this.url = url;
+		this.wordNum = numberOfWords;
 	}
  	public void run() {
  		 
@@ -24,18 +26,18 @@ public class Worker extends Thread{
 
 		try {
 			//fails when called from service handler
-			p = new NodeParser(url, term);
+			p = new NodeParser(url, term,wordNum);
 			p.process();
 			wordMap = p.getMap();
  
  		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			wordMap.put("error",100);
+			wordMap.put("Error",100);
 		}
 		
 	}
- 	public Map<String,Integer> getMap() {
+ 	public Map<String, Integer>  getMap() {
  		return wordMap;
  	}
  

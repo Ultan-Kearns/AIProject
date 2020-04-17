@@ -37,11 +37,12 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
 public class NodeParser {
 	// change these only template best first search
 	// Code was adapted from Assignment workshop by Dr. John Healy GMIT
-	protected static final int MAX = 20;
+	protected static final int MAX = 50;
 	private static final int TITLE_WEIGHT = 100;
 	private static final int HEADING_WEIGHT = 20;
 	private static final int PARAGRAPH_WEIGHT = 1;
  	private String term;
+ 	private int wordNum;
  	// for
 	private Set<String> closed = new ConcurrentSkipListSet<String>();
 	// get comparator
@@ -56,9 +57,10 @@ public class NodeParser {
 	 * @param searchTerm
 	 * @throws IOException
 	 */
-	public NodeParser(String url, String searchTerm) throws IOException {
+	public NodeParser(String url, String searchTerm,int numberOfWords) throws IOException {
 		super();
 		this.term = searchTerm;
+		this.wordNum = numberOfWords;
 		// https://duckduckgo.com/html/?q= works
 		System.out.println("URL : " + url + "  CHILD  " + searchTerm);
 		Document doc = Jsoup.connect(url + searchTerm).get();
@@ -108,10 +110,10 @@ public class NodeParser {
 	 * @return
 	 * this function will return a map of the text
 	 */
-	private void index(String text,int index) {
+	private void index(String text,int frequency) {
 		//put word and number of occurrences into map only need 20 words may change for options
-		if(map.size() < 20 && 	ignoreWords.toString().contains(text) == false) {
-		map.put(text,index); 
+		if(map.size() < this.wordNum && ignoreWords.toString().contains(text) == false) {
+		map.put(text,frequency); 
 		} 
 	}
 
@@ -144,13 +146,18 @@ public class NodeParser {
 		textBody = textBody.toLowerCase();
 		int occurrence = 0;
 		// Use regex to detect s - ref : https://stackoverflow.com/questions/22566503/count-the-number-of-occurrences-of-a-word-in-a-string
+		try {
 		Pattern searchPattern = Pattern.compile(word);
 		Matcher findMatch = searchPattern.matcher(textBody);
 		while (findMatch.find()) {
 			occurrence++;
 		}
+		}
+		catch(Exception e) {
+			
+		}
 		if(occurrence > 5 ) {
-		index(word,map.size());
+		index(word,occurrence);
 		}
 		return occurrence;
 	}
@@ -267,18 +274,15 @@ public class NodeParser {
 		//create + start worker threads
 		//testing multithreading works
  
-		Worker w1 = new Worker("https://duckduckgo.com/html/?q=", "hello");
-		Worker w2 = new Worker("https://duckduckgo.com/html/?q=", "test");
-		w1.start();
-		w2.start();
-		w1.join();
-		w2.join();
-		Map<String, Integer> test = new ConcurrentHashMap<String, Integer>(w2.getMap());
+		Worker w1 = new Worker("https://duckduckgo.com/html/?q=", "Triumverate",30);
+ 		w1.start();
+ 		w1.join();
+ 		Map<String, Integer> test = new ConcurrentHashMap<String, Integer> (w1.getMap());
 		System.out.println("most occuring words" + test.toString());
 		
 	} 
  
-	public Map<String, Integer> getMap(){
+	public Map<String, Integer>  getMap(){
 		return map;
 	}
 }
